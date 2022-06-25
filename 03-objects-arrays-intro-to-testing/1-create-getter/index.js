@@ -9,7 +9,7 @@ export function createGetter(path) {
     let value = {...obj};
     for (let i = 0; i < partsArray.length; i++) {
       if (typeof value[partsArray[i]] === 'undefined') {
-        return undefined;
+        return;
       } else {
         value = value[partsArray[i]];
       }
