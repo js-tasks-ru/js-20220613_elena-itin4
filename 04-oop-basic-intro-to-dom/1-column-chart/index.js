@@ -86,9 +86,4 @@ export default class ColumnChart {
 
 }
 
-const formatHeading = data => `USD ${data}`;
-const value = 100;
-
-let  columnChart = new ColumnChart({ formatHeading, value });
-console.log(columnChart);
 
