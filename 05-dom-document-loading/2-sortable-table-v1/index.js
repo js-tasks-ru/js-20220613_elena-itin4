@@ -1,5 +1,5 @@
 export default class SortableTable {
-
+  subElements = {};
 
   constructor(headerConfig = [], data = []) {
     this.headerConfig = [...headerConfig];
@@ -7,7 +7,7 @@ export default class SortableTable {
 
     this.sort();
     this.render();
-    this.subElements = this.getSubElement();
+
   }
 
   render() {
@@ -15,6 +15,8 @@ export default class SortableTable {
     const wrapper = document.createElement('div');
     wrapper.innerHTML = this.getTemplate();
     this.element = wrapper.firstElementChild;
+
+    this.subElements = this.getSubElement();
   }
 
   getTemplate() {
