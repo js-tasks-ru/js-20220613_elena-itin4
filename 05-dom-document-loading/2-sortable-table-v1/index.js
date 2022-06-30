@@ -1,5 +1,5 @@
 export default class SortableTable {
-  static subElement = null;
+
 
   constructor(headerConfig = [], data = []) {
     this.headerConfig = [...headerConfig];
@@ -7,16 +7,14 @@ export default class SortableTable {
 
     this.sort();
     this.render();
-
+    this.subElements = this.getSubElement();
   }
 
   render() {
+
     const wrapper = document.createElement('div');
     wrapper.innerHTML = this.getTemplate();
     this.element = wrapper.firstElementChild;
-    setTimeout(() => {
-      SortableTable.subElement = this.getSubElement();
-    }, 1);
   }
 
   getTemplate() {
@@ -77,7 +75,7 @@ export default class SortableTable {
 
   getDataItems(dataItem) {
     return this.headerConfig.map(headerItem => {
-      return headerItem.id !== 'images' ? `<div class= "sortable-table__cell" >${dataItem[headerItem.id]} </div>` : this.getImage(headerItem.template, dataItem[headerItem.id]);
+      return headerItem.id !== 'images' ? `<div class= "sortable-table__cell" >${dataItem[headerItem.id]}</div>` : this.getImage(headerItem.template, dataItem[headerItem.id]);
     }).join("");
   }
 
@@ -111,14 +109,23 @@ export default class SortableTable {
       }
     }
     this.data = res;
-    if (SortableTable.subElement) {
-      SortableTable.subElement.innerHTML = this.getBody();
+
+    if (this.subElements) {
+      this.subElements.body.innerHTML = this.getBody();
     }
   }
 
 
   getSubElement() {
-    return document.querySelector(".sortable-table__body");
+    const res = {};
+    const elements = this.element.querySelectorAll("[data-element]");
+
+    for (const subElement of elements) {
+      const name = subElement.dataset.element;
+
+      res[name] = subElement;
+    }
+    return res;
   }
 }
 
