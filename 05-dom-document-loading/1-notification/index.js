@@ -1,7 +1,7 @@
 export default class NotificationMessage {
-  static subElement = null;
+  static activeNotification;
 
-  constructor(message = '', {duration = 0, type = 'error'} = {}) {
+  constructor(message = '', {duration = 1000, type = 'error'} = {}) {
     this.message = message;
     this.duration = duration;
     this.type = type;
@@ -14,12 +14,9 @@ export default class NotificationMessage {
     wrapper.innerHTML = this.getTemplate();
     this.element = wrapper.firstElementChild;
 
-    NotificationMessage.subElement = this.getSubElement();
   }
 
-  getSubElement () {
-    return document.querySelector(".notification");
-  }
+
 
   getTemplate() {
     return `
@@ -43,25 +40,20 @@ export default class NotificationMessage {
   }
 
   destroy() {
-    this.duration = 0;
     this.remove();
     this.element = null;
-
+    NotificationMessage.activeNotification = null;
   }
 
 
-  show(div) {
-    if (NotificationMessage.subElement && !div) {
-      NotificationMessage.subElement.replaceWith(this.element);
-    } else if (div) {
-      if (NotificationMessage.subElement) {
-        NotificationMessage.subElement.remove();
-      }
-      div.append(this.element);
-    } else {
-      const rootElement = document.querySelector("#btn1");
-      rootElement.after(this.element);
+  show(root = document.body) {
+    console.log(NotificationMessage.activeNotification);
+    if (NotificationMessage.activeNotification) {
+      NotificationMessage.activeNotification.remove();
     }
+    root.append(this.element);
+    console.log("here");
     setTimeout(() => this.remove(), this.duration);
+    NotificationMessage.activeNotification = this;
   }
 }

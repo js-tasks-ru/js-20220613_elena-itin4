@@ -1,11 +1,11 @@
 export default class SortableTable {
   subElements = {};
+  element;
 
   constructor(headerConfig = [], data = []) {
-    this.headerConfig = [...headerConfig];
-    this.data = [...data];
+    this.headerConfig = headerConfig;
+    this.data = data;
 
-    this.sort();
     this.render();
 
   }
@@ -14,9 +14,10 @@ export default class SortableTable {
 
     const wrapper = document.createElement('div');
     wrapper.innerHTML = this.getTemplate();
-    this.element = wrapper.firstElementChild;
+    const element = wrapper.firstElementChild;
+    this.element = element;
 
-    this.subElements = this.getSubElement();
+    this.subElements = this.getSubElements(element);
   }
 
   getTemplate() {
@@ -54,19 +55,16 @@ export default class SortableTable {
   }
 
   getHeader() {
-    if (this.headerConfig.length !== 0) {
-      return this.headerConfig.map(item => {
-        return `<div className="sortable-table__cell" data-id="${item.id}" data-sortable="${item.sortable}" data-order="asc">
+    return this.headerConfig.map(item => {
+      return `<div className="sortable-table__cell" data-id="${item.id}" data-sortable="${item.sortable}" data-order="asc">
           <span>${item.title}</span>
         </div>`;
-      }).join("");
-    }
-
+    }).join("");
   }
 
-  getBody() {
-    if (this.data !== 0) {
-      return this.data.map(dataItem => {
+  getBody(res = this.data) {
+    if (res !== 0) {
+      return res.map(dataItem => {
         return `
         <a href="/products/${dataItem.id}" class="sortable-table__row">
         ${this.getDataItems(dataItem)}
@@ -76,51 +74,51 @@ export default class SortableTable {
   }
 
   getDataItems(dataItem) {
-    return this.headerConfig.map(headerItem => {
-      return headerItem.id !== 'images' ? `<div class= "sortable-table__cell" >${dataItem[headerItem.id]}</div>` : this.getImage(headerItem.template, dataItem[headerItem.id]);
-    }).join("");
+    const cells = this.headerConfig.map(({id, template}) => {
+      return {
+        id,
+        template};
+    });
+    return cells.map(({id, template}) => {
+      return template
+        ? template(dataItem[id])
+        : `<div class= "sortable-table__cell" >${dataItem[id]}</div>`;
+    }).join('');
   }
 
-
-  getImage(template, arr = []) {
-    if (template) {
-      return template(arr);
-    } else {
-      return `
-    <div class="sortable-table__cell">
-      <img class="sortable-table-image" alt="Image" src="http://magazilla.ru/jpg_zoom1/246743.jpg">
-    </div>`;
-    }
-  }
 
 
   sort(fieldValue = 'title', orderValue = 'asc') {
     const res = [...this.data];
-    const sortType = this.headerConfig.filter(item => (item.id === fieldValue))[0].sortType;
-    if (sortType === 'string') {
-      if (orderValue === 'desc') {
-        res.sort((a, b) => b[fieldValue].localeCompare(a[fieldValue], ['ru-RU', 'en-US'], {caseFirst: 'upper'}));
-      } else if (orderValue === 'asc') {
-        res.sort((a, b) => a[fieldValue].localeCompare(b[fieldValue], ['ru-RU', 'en-US'], {caseFirst: 'upper'}));
-      }
-    } else if (sortType === 'number') {
-      if (orderValue === 'desc') {
-        res.sort((a, b) => b[fieldValue] - a[fieldValue]);
-      } else if (orderValue === 'asc') {
-        res.sort((a, b) => a[fieldValue] - b[fieldValue]);
-      }
-    }
-    this.data = res;
+    const column = this.headerConfig.find(item => item.id === fieldValue);
+    const { sortType } = column;
 
-    if (this.subElements) {
-      this.subElements.body.innerHTML = this.getBody();
-    }
+    const directions = {
+      asc: 1,
+      desc: -1
+    };
+
+    const direction = directions[orderValue];
+
+    res.sort((a, b) =>{
+      switch (sortType) {
+      case 'number':
+        return direction * (a[fieldValue] - b[fieldValue]);
+      case 'string':
+        return direction * a[fieldValue].localeCompare(b[fieldValue], ['ru-RU', 'en-US'], {caseFirst: 'upper'});
+      default :
+        return direction * (a[fieldValue] - b[fieldValue]);
+      }
+    });
+
+    this.subElements.body.innerHTML = this.getBody(res);
+
   }
 
 
-  getSubElement() {
+  getSubElements(element) {
     const res = {};
-    const elements = this.element.querySelectorAll("[data-element]");
+    const elements = element.querySelectorAll("[data-element]");
 
     for (const subElement of elements) {
       const name = subElement.dataset.element;
