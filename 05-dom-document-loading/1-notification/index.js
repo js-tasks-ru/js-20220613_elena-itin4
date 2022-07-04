@@ -47,12 +47,10 @@ export default class NotificationMessage {
 
 
   show(root = document.body) {
-    console.log(NotificationMessage.activeNotification);
     if (NotificationMessage.activeNotification) {
       NotificationMessage.activeNotification.remove();
     }
     root.append(this.element);
-    console.log("here");
     setTimeout(() => this.remove(), this.duration);
     NotificationMessage.activeNotification = this;
   }

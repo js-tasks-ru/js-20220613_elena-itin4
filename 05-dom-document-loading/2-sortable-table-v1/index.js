@@ -6,6 +6,7 @@ export default class SortableTable {
     this.headerConfig = headerConfig;
     this.data = data;
 
+
     this.render();
 
   }
@@ -56,7 +57,7 @@ export default class SortableTable {
 
   getHeader() {
     return this.headerConfig.map(item => {
-      return `<div className="sortable-table__cell" data-id="${item.id}" data-sortable="${item.sortable}" data-order="asc">
+      return `<div className="sortable-table__cell" data-id="${item.id}" data-sortable="${item.sortable}">
           <span>${item.title}</span>
         </div>`;
     }).join("");
