@@ -1,14 +1,28 @@
-export default class ColumnChart {
 
-  constructor (obj = {data: [], label: '', link: '', value: '0'}) {
-    this.chartHeight = 50;
-    this.data = obj.data;
-    this.label = obj.label;
-    this.value = obj.value;
-    this.link = obj.link;
-    this.formatHeading = obj.formatHeading;
-    this.getFormatHeading();
+
+export default class ColumnChart {
+  chartHeight = 50;
+  subElements = {};
+
+  constructor ({data = [], label = '', link = '', value = 0, formatHeading = data => data} = {}) {
+    this.data = data;
+    this.label = label;
+    this.value = formatHeading(value);
+    this.link = link;
+
     this.render();
+  }
+
+  getSubElements() {
+    const res = {};
+    const elements = this.element.querySelectorAll("[data-element]");
+
+    for (const subElement of elements) {
+      const name = subElement.dataset.element;
+
+      res[name] = subElement;
+    }
+    return res;
   }
 
   getTitle() {
@@ -26,23 +40,18 @@ export default class ColumnChart {
     }
   }
 
-  getFormatHeading() {
-    if (this.formatHeading) {
-      this.value = this.formatHeading(this.value);
-    }
-  }
+
   getColumns() {
-    let res = '';
-    if (this.data && this.data.length !== 0) {
+    if (this.data.length !== 0) {
       const maxValue = Math.max(...this.data);
       const scale = this.chartHeight / maxValue;
-      for (const item of this.data) {
-        res += `
-        <div style=--value:${String(Math.floor(item * scale))}
-        data-tooltip= ${(item / maxValue * 100).toFixed(0)}%></div>`;
-      }
+
+      return this.data.map(item => {
+        const percent = ((item / maxValue) * 100).toFixed(0);
+
+        return `<div style="--value: ${Math.floor(item * scale)}" data-tooltip="${percent}%"></div>`;
+      }).join("");
     }
-    return res;
   }
 
   render() {
@@ -54,6 +63,7 @@ export default class ColumnChart {
     wrapper.setAttribute('style', `--chart-height: ${this.chartHeight}`);
     wrapper.innerHTML = this.getTemplate();
     this.element = wrapper;
+    this.subElements = this.getSubElements();
   }
 
   getTemplate() {
@@ -72,15 +82,18 @@ export default class ColumnChart {
 
   update(newData) {
     this.data = newData;
-    this.render();
+    this.subElements.body.innerHTML = this.getColumns();
   }
 
   remove() {
-    this.element.remove();
+    if (this.element) {
+      this.element.remove();
+    }
   }
 
   destroy() {
     this.remove();
+    this.element = null;
   }
 
 
