@@ -38,6 +38,7 @@ class Tooltip {
   destroy() {
     document.removeEventListener('pointerover', this.handlePointerOver);
     document.removeEventListener('pointerout', this.handlePointerOut);
+    document.removeEventListener("pointermove", this.handlePointerMove);
     this.remove();
     this.element = null;
 
@@ -64,9 +65,10 @@ class Tooltip {
 
 
   handlePointerMove(event) {
+    const step = 5;
     if (this.element) {
-      this.element.style.left = event.pageX + 5 + "px";
-      this.element.style.top = event.pageY + 5 + "px";
+      this.element.style.left = event.pageX + step + "px";
+      this.element.style.top = event.pageY + step + "px";
     }
   }
 
