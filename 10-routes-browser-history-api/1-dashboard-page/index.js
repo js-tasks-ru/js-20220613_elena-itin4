@@ -1,6 +1,7 @@
 import RangePicker from './components/range-picker/src/index.js';
 import SortableTable from './components/sortable-table/src/index.js';
 import ColumnChart from './components/column-chart/src/index.js';
+
 import header from './bestsellers-header.js';
 
 import fetchJson from './utils/fetch-json.js';
@@ -13,7 +14,7 @@ export default class Page {
   components = {};
   url = new URL('api/dashboard/bestsellers', BACKEND_URL);
 
-  async updateComponents(from, to) {
+  async updateComponents (from, to) {
     const data = await this.loadData(from, to);
 
     this.components.sortableTable.update(data);
@@ -23,7 +24,7 @@ export default class Page {
     this.components.customersChart.update(from, to);
   }
 
-  loadData(from, to) {
+  loadData (from, to) {
     this.url.searchParams.set('_start', '1');
     this.url.searchParams.set('_end', '21');
     this.url.searchParams.set('_sort', 'title');
@@ -34,7 +35,7 @@ export default class Page {
     return fetchJson(this.url);
   }
 
-  initComponents() {
+  initComponents () {
     const now = new Date();
     const to = new Date();
     const from = new Date(now.setMonth(now.getMonth() - 1));
@@ -43,23 +44,24 @@ export default class Page {
       from,
       to
     });
+
     const sortableTable = new SortableTable(header, {
-      url: `api/dashboard/bestsellers?_start+1&_end=20&from=${from.toISOString()}&to=${to.toISOString()}`,
+      url: `api/dashboard/bestsellers?_start=1&_end=20&from=${from.toISOString()}&to=${to.toISOString()}`,
       isSortLocally: true
     });
 
     const ordersChart = new ColumnChart({
-      url: `api/dashboard/orders`,
+      url: 'api/dashboard/orders',
       range: {
         from,
         to
       },
-      label: `orders`,
-      link: `#`
+      label: 'orders',
+      link: '#'
     });
 
     const salesChart = new ColumnChart({
-      url: `api/dashboard/sales`,
+      url: 'api/dashboard/sales',
       label: 'sales',
       range: {
         from,
@@ -85,17 +87,17 @@ export default class Page {
     };
   }
 
-  renderComponents() {
+  renderComponents () {
     Object.keys(this.components).forEach(component => {
       const root = this.subElements[component];
-      const {element} = this.components[component];
+      const { element } = this.components[component];
 
       root.append(element);
     });
   }
 
-  get template() {
-    return ` <div class="dashboard">
+  get template () {
+    return `<div class="dashboard">
       <div class="content__top-panel">
         <h2 class="page-title">Dashboard</h2>
         <!-- RangePicker component -->
@@ -110,13 +112,13 @@ export default class Page {
 
       <h3 class="block-title">Best sellers</h3>
 
-      <div data-element="sortableTable" class="sortableTable">
+      <div data-element="sortableTable">
         <!-- sortable-table component -->
       </div>
     </div>`;
   }
 
-  render() {
+  render () {
     const element = document.createElement('div');
 
     element.innerHTML = this.template;
@@ -130,41 +132,39 @@ export default class Page {
     this.initEventListeners();
 
     return this.element;
-
   }
 
-  getSubElements() {
+  getSubElements () {
     const elements = this.element.querySelectorAll('[data-element]');
 
     return [...elements].reduce((accum, subElement) => {
       accum[subElement.dataset.element] = subElement;
+
       return accum;
     }, {});
   }
 
-  initEventListeners() {
+  initEventListeners () {
     this.components.rangePicker.element.addEventListener('date-select', event => {
-      const {from, to} = event.detail;
+      const { from, to } = event.detail;
 
       this.updateComponents(from, to);
     });
   }
 
-  destroy() {
-    this.remove();
-    this.element = null;
-    this.subElements = {};
-
-    for (const component of Object.values(this.components)){
-      component.destroy();
-    }
-    this.components = {};
-  }
-
-  remove() {
+  remove () {
     if (this.element) {
       this.element.remove();
     }
   }
 
+  destroy () {
+    this.remove();
+    this.subElements = {};
+    this.element = null;
+
+    for (const component of Object.values(this.components)) {
+      component.destroy();
+    }
+  }
 }
